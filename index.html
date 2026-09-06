@@ -121,7 +121,6 @@
             font-weight: 600;
         }
 
-        /* Seção de Metas */
         .goal-section {
             background-color: var(--result-bg);
             padding: 12px;
@@ -183,17 +182,17 @@
             margin-top: 15px;
             display: flex;
             flex-direction: column;
-            gap: 10px;
+            gap: 12px;
         }
 
         .result-card {
             background-color: var(--result-bg);
             border-left: 5px solid #4f46e5;
-            padding: 10px 15px;
+            padding: 12px 15px;
             border-radius: 6px;
             display: flex;
-            justify-content: space-between;
-            align-items: center;
+            flex-direction: column;
+            gap: 8px;
             font-size: 1rem;
         }
 
@@ -201,6 +200,12 @@
         .result-card:nth-child(2) { border-left-color: #10b981; }
         .result-card:nth-child(3) { border-left-color: #f59e0b; }
         .result-card:nth-child(4) { border-left-color: #ef4444; }
+
+        .result-header-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
 
         .label-input {
             background: transparent;
@@ -217,10 +222,28 @@
             color: var(--text-color);
         }
 
+        /* Campo de Notas Opcionais por Categoria */
+        .note-input {
+            width: 100%;
+            padding: 6px 10px;
+            font-size: 0.85rem;
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            color: var(--text-color);
+            outline: none;
+            box-sizing: border-box;
+            transition: border-color 0.2s;
+        }
+
+        .note-input:focus {
+            border-color: var(--primary-color);
+        }
+
         .actions {
             display: flex;
             gap: 10px;
-            margin-top: 15px;
+            margin-top: 20px;
         }
 
         .btn {
@@ -237,7 +260,6 @@
         .btn-primary { background-color: var(--primary-color); color: white; }
         .btn-secondary { background-color: var(--border-color); color: var(--text-color); }
 
-        /* Histórico */
         .history-section {
             margin-top: 25px;
             border-top: 1px solid var(--border-color);
@@ -279,7 +301,6 @@
             color: var(--text-color);
         }
 
-        /* Seção de Evolução Mensal */
         .evolution-section {
             margin-top: 20px;
             border-top: 1px solid var(--border-color);
@@ -308,7 +329,6 @@
 
         <div id="alertBox" class="alert-box">⚠️ Por favor, insira um valor válido maior que zero.</div>
 
-        <!-- Seção de Meta para Investimentos (20%) -->
         <div class="goal-section">
             <div class="goal-header">
                 <span id="goalTitleText">Meta de Investimento:</span>
@@ -328,21 +348,37 @@
         </div>
 
         <div class="results">
+            <!-- Categoria 1 -->
             <div class="result-card">
-                <input type="text" class="label-input" value="60% - Custos Fixos" oninput="atualizarGrafico()">
-                <span class="value" id="res60">R$ 0,00</span>
+                <div class="result-header-row">
+                    <input type="text" class="label-input" value="60% - Custos Fixos" oninput="atualizarGrafico()">
+                    <span class="value" id="res60">R$ 0,00</span>
+                </div>
+                <input type="text" class="note-input" id="note60" placeholder="Anotar gastos (ex: Aluguel, contas...)">
             </div>
+            <!-- Categoria 2 -->
             <div class="result-card">
-                <input type="text" class="label-input" value="20% - Investimentos" oninput="atualizarGrafico()">
-                <span class="value" id="res20">R$ 0,00</span>
+                <div class="result-header-row">
+                    <input type="text" class="label-input" value="20% - Investimentos" oninput="atualizarGrafico()">
+                    <span class="value" id="res20">R$ 0,00</span>
+                </div>
+                <input type="text" class="note-input" id="note20" placeholder="Anotar onde vai investir...">
             </div>
+            <!-- Categoria 3 -->
             <div class="result-card">
-                <input type="text" class="label-input" value="10% - Objetivos/Lazer" oninput="atualizarGrafico()">
-                <span class="value" id="res10a">R$ 0,00</span>
+                <div class="result-header-row">
+                    <input type="text" class="label-input" value="10% - Objetivos/Lazer" oninput="atualizarGrafico()">
+                    <span class="value" id="res10a">R$ 0,00</span>
+                </div>
+                <input type="text" class="note-input" id="note10a" placeholder="Anotar lazer (ex: Passeio, cinema...)">
             </div>
+            <!-- Categoria 4 -->
             <div class="result-card">
-                <input type="text" class="label-input" value="10% - Doações/Outros" oninput="atualizarGrafico()">
-                <span class="value" id="res10b">R$ 0,00</span>
+                <div class="result-header-row">
+                    <input type="text" class="label-input" value="10% - Doações/Outros" oninput="atualizarGrafico()">
+                    <span class="value" id="res10b">R$ 0,00</span>
+                </div>
+                <input type="text" class="note-input" id="note10b" placeholder="Anotar outros gastos...">
             </div>
         </div>
 
@@ -361,7 +397,6 @@
             </div>
         </div>
 
-        <!-- Evolução Mensal -->
         <div class="evolution-section">
             <div class="history-header">
                 <h3>Evolução dos Valores Salvos</h3>
@@ -382,7 +417,6 @@
         let financeChart, evolutionChart;
 
         function initCharts() {
-            // Gráfico de Pizza
             const ctxPie = document.getElementById('financeChart').getContext('2d');
             financeChart = new Chart(ctxPie, {
                 type: 'doughnut',
@@ -397,7 +431,6 @@
                 options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } } }
             });
 
-            // Gráfico de Evolução (Linha)
             const ctxLine = document.getElementById('evolutionChart').getContext('2d');
             evolutionChart = new Chart(ctxLine, {
                 type: 'line',
@@ -490,7 +523,7 @@
 
         function atualizarMeta() {
             const valorTotal = parseFloat(document.getElementById('valorTotal').value) || 0;
-            const val20 = valorTotal * 0.20; // Pega o valor atual gerado na categoria 2
+            const val20 = valorTotal * 0.20;
             const metaValor = parseFloat(document.getElementById('metaInput').value) || 0;
 
             const nomeCategoria2 = document.querySelectorAll('.label-input')[1].value;
@@ -516,11 +549,21 @@
                 document.getElementById('res10a').innerText,
                 document.getElementById('res10b').innerText
             ];
+            const notas = [
+                document.getElementById('note60').value,
+                document.getElementById('note20').value,
+                document.getElementById('note10a').value,
+                document.getElementById('note10b').value
+            ];
 
             let texto = `*Planejamento Financeiro*\nTotal: ${formatarMoeda(parseFloat(total))}\n\n`;
-            labels.forEach((l, i) => { texto += `• ${l}: ${valores[i]}\n`; });
+            labels.forEach((l, i) => { 
+                texto += `• ${l}: ${valores[i]}`;
+                if(notas[i]) texto += ` (${notas[i]})`;
+                texto += `\n`; 
+            });
 
-            navigator.clipboard.writeText(texto).then(() => alert('Resumo copiado!'));
+            navigator.clipboard.writeText(texto).then(() => alert('Resumo copiado com as anotações!'));
         }
 
         function salvarHistorico() {
@@ -531,7 +574,13 @@
             const itemHistorico = {
                 data: dataAtual,
                 valorBruto: parseFloat(total),
-                valorFormatado: formatarMoeda(parseFloat(total))
+                valorFormatado: formatarMoeda(parseFloat(total)),
+                notas: {
+                    n60: document.getElementById('note60').value,
+                    n20: document.getElementById('note20').value,
+                    n10a: document.getElementById('note10a').value,
+                    n10b: document.getElementById('note10b').value
+                }
             };
 
             let historico = JSON.parse(localStorage.getItem('fin_historico')) || [];
@@ -540,8 +589,8 @@
 
             localStorage.setItem('fin_historico', JSON.stringify(historico));
             carregarHistorico();
-            atualizarGraficoEvolucao();
-            alert('Cálculo salvo no histórico!');
+           atualizarGraficoEvolucao();
+            alert('Cálculo e anotações salvos no histórico!');
         }
 
         function carregarHistorico() {
@@ -555,8 +604,7 @@
 
             historyList.innerHTML = '';
             historico.forEach((item, index) => {
-                historyList.innerHTML += `
-                    <div class="history-item" onclick="carregarCalculoSalvo(${index})">
+                historyList.innerHTML += `<div class="history-item" onclick="carregarCalculoSalvo(${index})">
                         <span>📅 ${item.data}</span>
                         <strong>${item.valorFormatado}</strong>
                     </div>
@@ -568,6 +616,15 @@
             let historico = JSON.parse(localStorage.getItem('fin_historico')) || [];
             if (historico[index]) {
                 document.getElementById('valorTotal').value = historico[index].valorBruto;
+                
+                // Restaura as notas se existirem salvas
+                if (historico[index].notas) {
+                    document.getElementById('note60').value = historico[index].notas.n60 || '';
+                    document.getElementById('note20').value = historico[index].notas.n20 || '';
+                    document.getElementById('note10a').value = historico[index].notas.n10a || '';
+                    document.getElementById('note10b').value = historico[index].notas.n10b || '';
+                }
+
                 calcularDivisao();
                 window.scrollTo({ top: 0, behavior: 'smooth' });
             }
@@ -575,15 +632,13 @@
 
         function atualizarGraficoEvolucao() {
             let historico = JSON.parse(localStorage.getItem('fin_historico')) || [];
-            // Inverte para exibir cronologicamente da esquerda para a direita
             let historicoCronologico = [...historico].reverse();
 
             evolutionChart.data.labels = historicoCronologico.map(i => i.data);
             evolutionChart.data.datasets[0].data = historicoCronologico.map(i => i.valorBruto);
             evolutionChart.update();
         }
-
-        function limparHistorico() {
+   function limparHistorico() {
             localStorage.removeItem('fin_historico');
             carregarHistorico();
             atualizarGraficoEvolucao();
