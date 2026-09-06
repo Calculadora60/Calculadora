@@ -4,6 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Calculadora de Finanças (60/20/10/10)</title>
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#4f46e5">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         :root {
@@ -90,7 +92,7 @@
             font-size: 0.95rem;
         }
 
-        input[type="number"] {
+        input[type="number"], input[type="text"] {
             width: 100%;
             padding: 12px;
             box-sizing: border-box;
@@ -103,12 +105,11 @@
             transition: border-color 0.2s;
         }
 
-        input[type="number"]:focus {
+        input[type="number"]:focus, input[type="text"]:focus {
             border-color: var(--primary-color);
             box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
         }
 
-        /* Área do Alerta de Erro */
         .alert-box {
             background-color: #fee2e2;
             color: #b91c1c;
@@ -120,32 +121,80 @@
             font-weight: 600;
         }
 
-        /* Container do Gráfico */
+        /* Seção de Metas */
+        .goal-section {
+            background-color: var(--result-bg);
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            border: 1px solid var(--border-color);
+        }
+
+        .goal-header {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.85rem;
+            font-weight: bold;
+            margin-bottom: 6px;
+        }
+
+        .progress-bar-bg {
+            background-color: var(--border-color);
+            border-radius: 4px;
+            height: 8px;
+            width: 100%;
+            overflow: hidden;
+        }
+
+        .progress-bar-fill {
+            background-color: #10b981;
+            height: 100%;
+            width: 0%;
+            transition: width 0.4s ease;
+        }
+
+        .goal-input-container {
+            display: flex;
+            gap: 10px;
+            margin-top: 8px;
+            align-items: center;
+        }
+
+        .goal-input-container label {
+            font-size: 0.8rem;
+            margin: 0;
+            white-space: nowrap;
+        }
+
+        .goal-input-container input {
+            padding: 6px;
+            font-size: 0.9rem;
+        }
+
         .chart-container {
             position: relative;
             width: 100%;
-            max-width: 250px;
-            margin: 0 auto 20px auto;
-            height: 200px;
+            max-width: 220px;
+            margin: 0 auto 15px auto;
+            height: 180px;
         }
 
         .results {
             margin-top: 15px;
             display: flex;
             flex-direction: column;
-            gap: 12px;
+            gap: 10px;
         }
 
         .result-card {
             background-color: var(--result-bg);
             border-left: 5px solid #4f46e5;
-            padding: 12px 15px;
+            padding: 10px 15px;
             border-radius: 6px;
             display: flex;
             justify-content: space-between;
             align-items: center;
             font-size: 1rem;
-            transition: background-color 0.3s;
         }
 
         .result-card:nth-child(1) { border-left-color: #4f46e5; }
@@ -161,15 +210,6 @@
             font-size: 0.95rem;
             width: 60%;
             outline: none;
-            border-bottom: 1px dashed transparent;
-            transition: border-color 0.2s;
-        }
-
-        .label-input:focus {
-            border-bottom-color: var(--primary-color);
-            background-color: rgba(0,0,0,0.03);
-            border-radius: 4px;
-            padding: 2px;
         }
 
         .value {
@@ -180,7 +220,7 @@
         .actions {
             display: flex;
             gap: 10px;
-            margin-top: 20px;
+            margin-top: 15px;
         }
 
         .btn {
@@ -194,27 +234,12 @@
             transition: opacity 0.2s;
         }
 
-        .btn-primary {
-            background-color: var(--primary-color);
-            color: white;
-        }
-
-        .btn-primary:hover {
-            background-color: var(--primary-hover);
-        }
-
-        .btn-secondary {
-            background-color: var(--border-color);
-            color: var(--text-color);
-        }
-
-        .btn-secondary:hover {
-            opacity: 0.8;
-        }
+        .btn-primary { background-color: var(--primary-color); color: white; }
+        .btn-secondary { background-color: var(--border-color); color: var(--text-color); }
 
         /* Histórico */
         .history-section {
-            margin-top: 30px;
+            margin-top: 25px;
             border-top: 1px solid var(--border-color);
             padding-top: 15px;
         }
@@ -226,26 +251,15 @@
             margin-bottom: 10px;
         }
 
-        .history-header h3 {
-            font-size: 1rem;
-            margin: 0;
-            color: var(--text-muted);
-        }
-
-        .clear-history {
-            background: none;
-            border: none;
-            color: #ef4444;
-            cursor: pointer;
-            font-size: 0.85rem;
-        }
+        .history-header h3 { font-size: 1rem; margin: 0; color: var(--text-muted); }
+        .clear-history { background: none; border: none; color: #ef4444; cursor: pointer; font-size: 0.85rem; }
 
         .history-list {
-            max-height: 150px;
+            max-height: 140px;
             overflow-y: auto;
             display: flex;
             flex-direction: column;
-            gap: 8px;
+            gap: 6px;
             font-size: 0.85rem;
         }
 
@@ -256,6 +270,26 @@
             display: flex;
             justify-content: space-between;
             color: var(--text-muted);
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .history-item:hover {
+            background-color: var(--border-color);
+            color: var(--text-color);
+        }
+
+        /* Seção de Evolução Mensal */
+        .evolution-section {
+            margin-top: 20px;
+            border-top: 1px solid var(--border-color);
+            padding-top: 15px;
+        }
+        .evolution-container {
+            position: relative;
+            width: 100%;
+            height: 150px;
+            margin-top: 10px;
         }
     </style>
 </head>
@@ -272,7 +306,22 @@
             <input type="number" id="valorTotal" placeholder="Ex: 3000.00" step="0.01" oninput="calcularDivisao()">
         </div>
 
-        <div id="alertBox" class="alert-box">⚠️ Por favor, insira um valor válido maior que zero (sem números negativos).</div>
+        <div id="alertBox" class="alert-box">⚠️ Por favor, insira um valor válido maior que zero.</div>
+
+        <!-- Seção de Meta para Investimentos (20%) -->
+        <div class="goal-section">
+            <div class="goal-header">
+                <span id="goalTitleText">Meta de Investimento:</span>
+                <span id="goalProgressText">R$ 0,00 / R$ 0,00 (0%)</span>
+            </div>
+            <div class="progress-bar-bg">
+                <div class="progress-bar-fill" id="goalProgressBar"></div>
+            </div>
+            <div class="goal-input-container">
+                <label for="metaInput">Definir Meta (R$):</label>
+                <input type="number" id="metaInput" placeholder="Ex: 1000.00" step="0.01" oninput="atualizarMeta()">
+            </div>
+        </div>
 
         <div class="chart-container">
             <canvas id="financeChart"></canvas>
@@ -304,22 +353,38 @@
 
         <div class="history-section">
             <div class="history-header">
-                <h3>Histórico Salvo</h3>
+                <h3>Histórico Salvo (Toque para ver)</h3>
                 <button class="clear-history" onclick="limparHistorico()">Limpar</button>
             </div>
             <div class="history-list" id="historyList">
                 <div style="color: var(--text-muted); text-align: center;">Nenhum cálculo salvo ainda.</div>
             </div>
         </div>
+
+        <!-- Evolução Mensal -->
+        <div class="evolution-section">
+            <div class="history-header">
+                <h3>Evolução dos Valores Salvos</h3>
+            </div>
+            <div class="evolution-container">
+                <canvas id="evolutionChart"></canvas>
+            </div>
+        </div>
     </div>
 
     <script>
-        let financeChart;
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('./sw.js').catch(err => console.log(err));
+            });
+        }
 
-        // Inicializar o Gráfico
-        function initChart() {
-            const ctx = document.getElementById('financeChart').getContext('2d');
-            financeChart = new Chart(ctx, {
+        let financeChart, evolutionChart;
+
+        function initCharts() {
+            // Gráfico de Pizza
+            const ctxPie = document.getElementById('financeChart').getContext('2d');
+            financeChart = new Chart(ctxPie, {
                 type: 'doughnut',
                 data: {
                     labels: ['60%', '20%', '10%', '10%'],
@@ -329,14 +394,29 @@
                         borderWidth: 0
                     }]
                 },
-                options: {
-                    responsive: true,
+                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } } }
+            });
+
+            // Gráfico de Evolução (Linha)
+            const ctxLine = document.getElementById('evolutionChart').getContext('2d');
+            evolutionChart = new Chart(ctxLine, {
+                type: 'line',
+                data: {
+                    labels: [],
+                    datasets: [{
+                        label: 'Total Salvo (R$)',
+                        data: [],
+                        borderColor: '#10b981',
+                        backgroundColor: 'rgba(16, 185, 129, 0.1)',
+                        fill: true,
+                        tension: 0.3
+                    }]
+                },
+                options: { 
+                    responsive: true, 
                     maintainAspectRatio: false,
-                    plugins: {
-                        legend: {
-                            display: false
-                        }
-                    }
+                    plugins: { legend: { display: false } },
+                    scales: { y: { beginAtZero: true } }
                 }
             });
         }
@@ -358,10 +438,8 @@
             const valor = parseFloat(inputValor);
             const alertBox = document.getElementById('alertBox');
 
-            // Validação de erro e saldo negativo
             if (inputValor !== "" && (isNaN(valor) || valor < 0)) {
                 alertBox.style.display = 'block';
-                alertBox.innerText = '⚠️ Atenção: Não são permitidos valores negativos ou inválidos.';
                 zerarResultados();
                 return;
             } else {
@@ -382,8 +460,8 @@
             document.getElementById('res10a').innerText = formatarMoeda(val10);
             document.getElementById('res10b').innerText = formatarMoeda(val10);
 
-            // Atualiza o gráfico com os novos valores reais
             atualizarGrafico(val60, val20, val10, val10);
+            atualizarMeta();
         }
 
         function zerarResultados() {
@@ -392,10 +470,10 @@
             document.getElementById('res10a').innerText = 'R$ 0,00';
             document.getElementById('res10b').innerText = 'R$ 0,00';
             atualizarGrafico(0, 0, 0, 0);
+            atualizarMeta(0);
         }
 
         function atualizarGrafico(v60 = 0, v20 = 0, v10a = 0, v10b = 0) {
-            // Se os valores não foram passados diretamente, recalcula
             const inputValor = parseFloat(document.getElementById('valorTotal').value) || 0;
             if (inputValor > 0 && v60 === 0) {
                 v60 = inputValor * 0.60;
@@ -404,57 +482,56 @@
                 v10b = inputValor * 0.10;
             }
 
-            // Pega os rótulos dinâmicos para atualizar a legenda mental do gráfico
-            const l1 = document.querySelectorAll('.label-input')[0].value;
-            const l2 = document.querySelectorAll('.label-input')[1].value;
-            const l3 = document.querySelectorAll('.label-input')[2].value;
-            const l4 = document.querySelectorAll('.label-input')[3].value;
-
-            financeChart.data.labels = [l1, l2, l3, l4];
+            const labels = Array.from(document.querySelectorAll('.label-input')).map(i => i.value);
+            financeChart.data.labels = labels;
             financeChart.data.datasets[0].data = [v60, v20, v10a, v10b];
             financeChart.update();
         }
 
-        function copiarResumo() {
-            const total = document.getElementById('valorTotal').value;
-            if (!total || total <= 0) {
-                alert('Insira um valor válido primeiro!');
-                return;
+        function atualizarMeta() {
+            const valorTotal = parseFloat(document.getElementById('valorTotal').value) || 0;
+            const val20 = valorTotal * 0.20; // Pega o valor atual gerado na categoria 2
+            const metaValor = parseFloat(document.getElementById('metaInput').value) || 0;
+
+            const nomeCategoria2 = document.querySelectorAll('.label-input')[1].value;
+            document.getElementById('goalTitleText').innerText = `Meta (${nomeCategoria2}):`;
+
+            let porcentagem = 0;
+            if (metaValor > 0) {
+                porcentagem = Math.min((val20 / metaValor) * 100, 100);
             }
 
-            const l1 = document.querySelectorAll('.label-input')[0].value;
-            const l2 = document.querySelectorAll('.label-input')[1].value;
-            const l3 = document.querySelectorAll('.label-input')[2].value;
-            const l4 = document.querySelectorAll('.label-input')[3].value;
+            document.getElementById('goalProgressText').innerText = `${formatarMoeda(val20)} / ${formatarMoeda(metaValor)} (${porcentagem.toFixed(0)}%)`;
+            document.getElementById('goalProgressBar').style.width = `${porcentagem}%`;
+        }
 
-            const v1 = document.getElementById('res60').innerText;
-            const v2 = document.getElementById('res20').innerText;
-            const v3 = document.getElementById('res10a').innerText;
-            const v4 = document.getElementById('res10b').innerText;
+        function copiarResumo() {
+            const total = document.getElementById('valorTotal').value;
+            if (!total || total <= 0) { alert('Insira um valor válido primeiro!'); return; }
 
-            const texto = `*Planejamento Financeiro*\n` +
-                          `Total: ${formatarMoeda(parseFloat(total))}\n\n` +
-                          `• ${l1}: ${v1}\n` +
-                          `• ${l2}: ${v2}\n` +
-                          `• ${l3}: ${v3}\n` +
-                          `• ${l4}: ${v4}`;
+            const labels = Array.from(document.querySelectorAll('.label-input')).map(i => i.value);
+            const valores = [
+                document.getElementById('res60').innerText,
+                document.getElementById('res20').innerText,
+                document.getElementById('res10a').innerText,
+                document.getElementById('res10b').innerText
+            ];
 
-            navigator.clipboard.writeText(texto).then(() => {
-                alert('Resumo copiado para a área de transferência!');
-            });
+            let texto = `*Planejamento Financeiro*\nTotal: ${formatarMoeda(parseFloat(total))}\n\n`;
+            labels.forEach((l, i) => { texto += `• ${l}: ${valores[i]}\n`; });
+
+            navigator.clipboard.writeText(texto).then(() => alert('Resumo copiado!'));
         }
 
         function salvarHistorico() {
             const total = document.getElementById('valorTotal').value;
-            if (!total || total <= 0) {
-                alert('Insira um valor válido para salvar!');
-                return;
-            }
+            if (!total || total <= 0) { alert('Insira um valor válido para salvar!'); return; }
 
-            const dataAtual = new Date().toLocaleDateString('pt-BR');
+            const dataAtual = new Date().toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' });
             const itemHistorico = {
                 data: dataAtual,
-                valor: formatarMoeda(parseFloat(total))
+                valorBruto: parseFloat(total),
+                valorFormatado: formatarMoeda(parseFloat(total))
             };
 
             let historico = JSON.parse(localStorage.getItem('fin_historico')) || [];
@@ -463,6 +540,7 @@
 
             localStorage.setItem('fin_historico', JSON.stringify(historico));
             carregarHistorico();
+            atualizarGraficoEvolucao();
             alert('Cálculo salvo no histórico!');
         }
 
@@ -476,27 +554,46 @@
             }
 
             historyList.innerHTML = '';
-            historico.forEach(item => {
+            historico.forEach((item, index) => {
                 historyList.innerHTML += `
-                    <div class="history-item">
-                        <span>${item.data}</span>
-                        <strong>${item.valor}</strong>
+                    <div class="history-item" onclick="carregarCalculoSalvo(${index})">
+                        <span>📅 ${item.data}</span>
+                        <strong>${item.valorFormatado}</strong>
                     </div>
                 `;
             });
         }
 
+        function carregarCalculoSalvo(index) {
+            let historico = JSON.parse(localStorage.getItem('fin_historico')) || [];
+            if (historico[index]) {
+                document.getElementById('valorTotal').value = historico[index].valorBruto;
+                calcularDivisao();
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            }
+        }
+
+        function atualizarGraficoEvolucao() {
+            let historico = JSON.parse(localStorage.getItem('fin_historico')) || [];
+            // Inverte para exibir cronologicamente da esquerda para a direita
+            let historicoCronologico = [...historico].reverse();
+
+            evolutionChart.data.labels = historicoCronologico.map(i => i.data);
+            evolutionChart.data.datasets[0].data = historicoCronologico.map(i => i.valorBruto);
+            evolutionChart.update();
+        }
+
         function limparHistorico() {
             localStorage.removeItem('fin_historico');
             carregarHistorico();
+            atualizarGraficoEvolucao();
         }
 
-        // Inicializa o gráfico e histórico ao carregar a página
         window.onload = function() {
-            initChart();
+            initCharts();
             carregarHistorico();
+            atualizarGraficoEvolucao();
         };
     </script>
-
 </body>
 </html>
