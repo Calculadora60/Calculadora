@@ -1,6 +1,6 @@
 {
-  "name": "Gestão 60/20/10/10",
-  "short_name": "Gestão 60-20",
+  "name": "Gestão financeira",
+  "short_name": "Gestão Fin",
   "start_url": "./index.html",
   "display": "standalone",
   "background_color": "#111827",

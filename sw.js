@@ -1,6 +1,6 @@
 self.addEventListener('install', (e) => {
   e.waitUntil(
-    caches.open('fin-pwa-v3').then((cache) => {
+    caches.open('fin-pwa-v4').then((cache) => {
       return cache.addAll([
         './index.html',
         './manifest.json',
